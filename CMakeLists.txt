@@ -226,7 +226,7 @@ foreach(_SUB ${SDL_X11_OPTIONS})
   dep_option(${_OPT}           "Enable ${_SUB} support" ON "VIDEO_X11" OFF)
 endforeach()
 set_option(VIDEO_COCOA         "Use Cocoa video driver" ${APPLE})
-set_option(DIRECTX             "Use DirectX for Windows audio/video" ${WINDOWS})
+set_option(DIRECTX             "Use DirectX for Windows audio/video" OFF)
 set_option(RENDER_D3D          "Enable the Direct3D render driver" ${WINDOWS})
 
 # TODO: We should (should we?) respect cmake's ${BUILD_SHARED_LIBS} flag here
