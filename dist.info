@@ -3,11 +3,8 @@
 name = "sdl"
 version = "2.0.1"
 
-desc = "Simple DirectMedia Layer is a cross-platform development library designed
-to provide low level access to audio, keyboard, mouse, joystick, and graphics
-hardware via OpenGL and Direct3D. It is used by video playback software,
-emulators, and popular games including Valve's award winning catalog
-and many Humble Bundle games."
+desc = "Simple DirectMedia Layer is a cross-platform development library designed to provide low level access to audio, keyboard, mouse, joystick, and graphics hardware via OpenGL and Direct3D. It is used by video playback software, emulators, and popular games including Valve's award winning catalog and many Humble Bundle games."
+
 author = "Sam Lantinga"
 license = "LGPL"
 url = "http://www.libsdl.org/"
