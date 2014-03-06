@@ -1,9 +1,10 @@
-if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
-  message(FATAL_ERROR "Prevented in-tree built. Please create a build directory outside of the SDL source code and call cmake from there")
-endif()
+# Original build modified by Peter Drahoš for LuaDist project
 
-cmake_minimum_required(VERSION 2.6)
-project(SDL2 C)
+cmake_minimum_required(VERSION 2.8)
+project(sdl C)
+
+include(cmake/dist.cmake)
+
 include(CheckFunctionExists)
 include(CheckLibraryExists)
 include(CheckIncludeFiles)
@@ -15,9 +16,11 @@ include(CheckTypeSize)
 include(CheckStructHasMember)
 include(CMakeDependentOption)
 include(FindPkgConfig)
-set(CMAKE_MODULE_PATH "${SDL2_SOURCE_DIR}/cmake")
-include(${SDL2_SOURCE_DIR}/cmake/macros.cmake)
-include(${SDL2_SOURCE_DIR}/cmake/sdlchecks.cmake)
+include(macros)
+include(sdlchecks)
+
+set(SDL2_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+set(SDL2_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR})
 
 # General settings
 # Edit include/SDL_version.h and change the version, then:
@@ -229,7 +232,7 @@ set_option(RENDER_D3D          "Enable the Direct3D render driver" ${WINDOWS})
 # TODO: We should (should we?) respect cmake's ${BUILD_SHARED_LIBS} flag here
 # The options below are for compatibility to configure's default behaviour.
 set(SDL_SHARED ON CACHE BOOL "Build a shared version of the library")
-set(SDL_STATIC ON CACHE BOOL "Build a static version of the library")
+set(SDL_STATIC OFF CACHE BOOL "Build a static version of the library")
 
 # General source files
 file(GLOB SOURCE_FILES
@@ -1173,21 +1176,21 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_CFLAGS}")
 
 # Always build SDLmain
 add_library(SDL2main STATIC ${SDLMAIN_SOURCES})
-set(_INSTALL_LIBS "SDL2main")
+#set(_INSTALL_LIBS "SDL2main")
 
 if(SDL_SHARED)
   add_library(SDL2 SHARED ${SOURCE_FILES})
-  if(UNIX)
-    set_target_properties(SDL2 PROPERTIES
-      VERSION ${LT_VERSION}
-      SOVERSION ${LT_CURRENT}
-      OUTPUT_NAME "SDL2-${LT_RELEASE}")
-  else(UNIX)
-    set_target_properties(SDL2 PROPERTIES
-      VERSION ${SDL_VERSION}
-      SOVERSION ${LT_CURRENT}
-      OUTPUT_NAME "SDL2")
-  endif(UNIX)
+#  if(UNIX)
+#    set_target_properties(SDL2 PROPERTIES
+#      VERSION ${LT_VERSION}
+#      SOVERSION ${LT_CURRENT}
+#      OUTPUT_NAME "SDL2-${LT_RELEASE}")
+#  else(UNIX)
+#    set_target_properties(SDL2 PROPERTIES
+#      VERSION ${SDL_VERSION}
+#      SOVERSION ${LT_CURRENT}
+#      OUTPUT_NAME "SDL2")
+#  endif(UNIX)
  set(_INSTALL_LIBS "SDL2" ${_INSTALL_LIBS})
  target_link_libraries(SDL2 ${EXTRA_LIBS} ${EXTRA_LDFLAGS})
 endif(SDL_SHARED)
@@ -1202,9 +1205,8 @@ if(SDL_STATIC)
 endif(SDL_STATIC)
 
 ##### Installation targets #####
-install(TARGETS ${_INSTALL_LIBS}
-  LIBRARY DESTINATION "lib${LIB_SUFFIX}"
-  ARCHIVE DESTINATION "lib${LIB_SUFFIX}")
+install_library(${_INSTALL_LIBS})
+install_data(COPYING.txt CREDITS.txt README.txt)
 
 file(GLOB INCLUDE_FILES ${SDL2_SOURCE_DIR}/include/*.h)
 file(GLOB BIN_INCLUDE_FILES ${SDL2_BINARY_DIR}/include/*.h)
@@ -1213,24 +1215,24 @@ foreach(_FNAME ${BIN_INCLUDE_FILES})
   list(REMOVE_ITEM INCLUDE_FILES ${SDL2_SOURCE_DIR}/include/${_INCNAME})
 endforeach()
 list(APPEND INCLUDE_FILES ${BIN_INCLUDE_FILES})
-install(FILES ${INCLUDE_FILES} DESTINATION include/SDL2)
+install_header(${INCLUDE_FILES} INTO SDL2)
 
-if(SDL_SHARED)
-  install(CODE "
-    execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink
-    \"libSDL2-2.0.so\" \"libSDL2.so\")")
-  install(FILES ${SDL2_BINARY_DIR}/libSDL2.so DESTINATION "lib${LIB_SUFFIX}")
-endif(SDL_SHARED)
+#if(SDL_SHARED)
+#  install(CODE "
+#    execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink
+#    \"libSDL2-2.0.so\" \"libSDL2.so\")")
+#  install(FILES ${SDL2_BINARY_DIR}/libSDL2.so DESTINATION "lib${LIB_SUFFIX}")
+#endif(SDL_SHARED)
 
-if(NOT WINDOWS OR CYGWIN)
-  if(FREEBSD)
-    # FreeBSD uses ${PREFIX}/libdata/pkgconfig
-    install(FILES ${SDL2_BINARY_DIR}/sdl2.pc DESTINATION "libdata/pkgconfig")
-  else(FREEBSD)
-    install(FILES ${SDL2_BINARY_DIR}/sdl2.pc
-      DESTINATION "lib${LIB_SUFFIX}/pkgconfig")
-  endif(FREEBSD)
-  install(PROGRAMS ${SDL2_BINARY_DIR}/sdl2-config DESTINATION bin)
-  # TODO: what about the .spec file? Is it only needed for RPM creation?
-  install(FILES "${SDL2_SOURCE_DIR}/sdl2.m4" DESTINATION "share/aclocal")
-endif(NOT WINDOWS OR CYGWIN)
+#if(NOT WINDOWS OR CYGWIN)
+#  if(FREEBSD)
+#    # FreeBSD uses ${PREFIX}/libdata/pkgconfig
+#    install(FILES ${SDL2_BINARY_DIR}/sdl2.pc DESTINATION "libdata/pkgconfig")
+#  else(FREEBSD)
+#    install(FILES ${SDL2_BINARY_DIR}/sdl2.pc
+#      DESTINATION "lib${LIB_SUFFIX}/pkgconfig")
+#  endif(FREEBSD)
+#  install(PROGRAMS ${SDL2_BINARY_DIR}/sdl2-config DESTINATION bin)
+#  # TODO: what about the .spec file? Is it only needed for RPM creation?
+#  install(FILES "${SDL2_SOURCE_DIR}/sdl2.m4" DESTINATION "share/aclocal")
+#endif(NOT WINDOWS OR CYGWIN)
